@@ -2,10 +2,12 @@ package app;
 
 import data_access.FileUserDataAccessObject;
 import entity.CommonUserFactory;
+import interface_adapter.clear_users.ClearViewModel;
 import interface_adapter.login.LoginViewModel;
 import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.signup.SignupViewModel;
 import interface_adapter.ViewManagerModel;
+import use_case.clear_users.ClearUserDataAccessInterface;
 import use_case.login.LoginUserDataAccessInterface;
 import view.LoggedInView;
 import view.LoginView;
@@ -42,6 +44,8 @@ public class Main {
         LoginViewModel loginViewModel = new LoginViewModel();
         LoggedInViewModel loggedInViewModel = new LoggedInViewModel();
         SignupViewModel signupViewModel = new SignupViewModel();
+        // TODO: made an edit here
+        ClearViewModel clearViewModel = new ClearViewModel();
 
         FileUserDataAccessObject userDataAccessObject;
         try {
@@ -50,7 +54,15 @@ public class Main {
             throw new RuntimeException(e);
         }
 
-        SignupView signupView = SignupUseCaseFactory.create(viewManagerModel, loginViewModel, signupViewModel, userDataAccessObject);
+        // TODO: made an edit here
+        ClearUserDataAccessInterface clearDataAccessObject;
+        try {
+            clearDataAccessObject = new FileUserDataAccessObject("./users.csv", new CommonUserFactory());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        SignupView signupView = SignupUseCaseFactory.create(viewManagerModel, loginViewModel, signupViewModel, userDataAccessObject, clearViewModel, clearDataAccessObject);
         views.add(signupView, signupView.viewName);
 
         LoginView loginView = LoginUseCaseFactory.create(viewManagerModel, loginViewModel, loggedInViewModel, userDataAccessObject);

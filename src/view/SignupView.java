@@ -1,5 +1,9 @@
 package view;
 
+import interface_adapter.clear_users.ClearController;
+import interface_adapter.clear_users.ClearState;
+import interface_adapter.clear_users.ClearViewModel;
+import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.signup.SignupController;
 import interface_adapter.signup.SignupState;
 import interface_adapter.signup.SignupViewModel;
@@ -12,15 +16,23 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
+import java.util.Objects;
 
 public class SignupView extends JPanel implements ActionListener, PropertyChangeListener {
     public final String viewName = "sign up";
 
     private final SignupViewModel signupViewModel;
+
+    // TODO: added
+    private final ClearViewModel clearViewModel;
+
     private final JTextField usernameInputField = new JTextField(15);
     private final JPasswordField passwordInputField = new JPasswordField(15);
     private final JPasswordField repeatPasswordInputField = new JPasswordField(15);
     private final SignupController signupController;
+
+    private final ClearController clearController;
 
     private final JButton signUp;
     private final JButton cancel;
@@ -28,11 +40,15 @@ public class SignupView extends JPanel implements ActionListener, PropertyChange
     // TODO Note: this is the new JButton for clearing the users file
     private final JButton clear;
 
-    public SignupView(SignupController controller, SignupViewModel signupViewModel) {
+
+    public SignupView(SignupController controller, SignupViewModel signupViewModel, ClearController clearController, ClearViewModel clearViewModel) {
 
         this.signupController = controller;
         this.signupViewModel = signupViewModel;
+        this.clearViewModel = clearViewModel;
+        this.clearController = clearController;
         signupViewModel.addPropertyChangeListener(this);
+        clearViewModel.addPropertyChangeListener(this);
 
         JLabel title = new JLabel(SignupViewModel.TITLE_LABEL);
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -54,6 +70,7 @@ public class SignupView extends JPanel implements ActionListener, PropertyChange
         //      a CLEAR_BUTTON_LABEL constant which is defined in the SignupViewModel class.
         //      You need to add this "clear" button to the "buttons" panel.
         clear = new JButton(SignupViewModel.CLEAR_BUTTON_LABEL);
+        buttons.add(clear);
 
         signUp.addActionListener(
                 // This creates an anonymous subclass of ActionListener and instantiates it.
@@ -72,6 +89,7 @@ public class SignupView extends JPanel implements ActionListener, PropertyChange
                 }
         );
 
+
         // TODO Add the body to the actionPerformed method of the action listener below
         //      for the "clear" button. You'll need to write the controller before
         //      you can complete this.
@@ -79,6 +97,12 @@ public class SignupView extends JPanel implements ActionListener, PropertyChange
                 new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
+                        if (e.getSource().equals(clear)) {
+                            ClearState currentState = clearViewModel.getState();
+
+                            clearController.execute();
+
+                        }
 
                     }
                 }
@@ -160,6 +184,8 @@ public class SignupView extends JPanel implements ActionListener, PropertyChange
         this.add(buttons);
     }
 
+
+
     /**
      * React to a button click that results in evt.
      */
@@ -169,9 +195,15 @@ public class SignupView extends JPanel implements ActionListener, PropertyChange
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        SignupState state = (SignupState) evt.getNewValue();
-        if (state.getUsernameError() != null) {
-            JOptionPane.showMessageDialog(this, state.getUsernameError());
+        if (evt.getPropertyName().equals("clear")) {
+            ClearState state = (ClearState) evt.getNewValue();
+            JOptionPane.showMessageDialog(this, state.getCleared());
+        }
+        else {
+            SignupState state = (SignupState) evt.getNewValue();
+            if (state.getUsernameError() != null) {
+                JOptionPane.showMessageDialog(this, state.getUsernameError());
+            }
         }
     }
 }
